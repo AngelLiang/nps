@@ -91,6 +91,7 @@ func (s *Conn) GetHost() (method, address string, rb []byte, err error, r *http.
 	return
 }
 
+/* 获取头部？ */
 func (s *Conn) GetShortLenContent() (b []byte, err error) {
 	var l int
 	if l, err = s.GetLen(); err != nil {

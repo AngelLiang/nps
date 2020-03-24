@@ -45,10 +45,10 @@ type Bridge struct {
 	Client      sync.Map
 	Register    sync.Map
 	tunnelType  string //bridge type kcp or tcp
-	OpenTask    chan *file.Tunnel
-	CloseTask   chan *file.Tunnel
-	CloseClient chan int
-	SecretChan  chan *conn.Secret
+	OpenTask    chan *file.Tunnel  // 打开任务队列
+	CloseTask   chan *file.Tunnel  // 关闭任务队列
+	CloseClient chan int           // 关闭客户端队列
+	SecretChan  chan *conn.Secret  // 
 	ipVerify    bool
 	runList     sync.Map //map[int]interface{}
 }
@@ -66,6 +66,7 @@ func NewTunnel(tunnelPort int, tunnelType string, ipVerify bool, runList sync.Ma
 	}
 }
 
+/* 启动隧道 */
 func (s *Bridge) StartTunnel() error {
 	go s.ping()
 	if s.tunnelType == "kcp" {
@@ -190,6 +191,8 @@ func (s *Bridge) cliProcess(c *conn.Conn) {
 		c.Close()
 		return
 	}
+
+	// 验证密钥
 	//verify
 	id, err := file.GetDb().GetIdByVerifyKey(string(buf), c.Conn.RemoteAddr().String())
 	if err != nil {
@@ -303,6 +306,7 @@ func (s *Bridge) register(c *conn.Conn) {
 	}
 }
 
+/* 发送连接信息 */
 func (s *Bridge) SendLinkInfo(clientId int, link *conn.Link, t *file.Tunnel) (target net.Conn, err error) {
 	//if the proxy type is local
 	if link.LocalProxy {
